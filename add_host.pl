@@ -56,7 +56,7 @@ print "define host {
 die print $help;
 }
 
-%linh = ("CPU", snmp_cpustats, "Uptime", uptime_info_onl, "Memory", snmp_mem, "Disk usage /", snmp_disk_root, "Disk usage /data", snmp_disk_data );
+%linh = ("CPU", snmp_cpustats, "Uptime", uptime_info_only, "Memory", snmp_mem, "Disk usage /", snmp_disk_root, "Disk usage /data", snmp_disk_data );
 
 if ( $lin == 1 ) {
 	foreach $key (keys %linh){ $value = $linh{$key};
