@@ -46,7 +46,7 @@ tee (STDOUT, '>', "/etc/nagios/tmp_cfg/$host.cfg");
 sub host_def {
 print  "define service{
         use                     generic-nt
-        host_name               $host.hs3.hepsiian.com
+        host_name               $host
         service_description	$_[0]
         check_command		$_[1]
         }
@@ -56,7 +56,7 @@ print  "define service{
 if ( $host ne "") {
 print "define host {
         use             generic-notify
-        host_name       $host.hs3.hepsiian.com
+        host_name       $host
         alias           $host
         address         $ip
         check_command	check_ping!100.0,20%!500.0,60%
@@ -91,8 +91,8 @@ if ( @dxa > 0 ) {
 	foreach (@dxa){
 print "define service{
 	use			generic-nt
-	host_name		$host.hs3.hepsiian.com
-	service_description	Check DX port $_
+	host_name		$host
+	service_description	Check port $_
 	check_command		check_tcp!$_
 	}
 "
@@ -102,7 +102,7 @@ if ( @sqla > 0 ) {
         foreach (@sqla){
 print "define service{
         use                     generic-nt
-        host_name               $host.hs3.hepsiian.com
+        host_name               $host
         service_description     MYSQL Slave $_
         check_command           check_mysql_slave!$_
         }
