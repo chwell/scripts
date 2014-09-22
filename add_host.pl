@@ -20,7 +20,6 @@ Useage for adding hosts
 -y  / --yes     automatically adds the config to
                 nagios then reloads the service \n";
 
-
 my $host = '';
 my $lin = '';
 my $win = '';
@@ -28,6 +27,7 @@ my $drs = '';
 my $conf = '';
 my $dx = '';
 my $dell = '';
+my $sql = '';
 GetOptions(
 	'h|host=s' => \$host,
         'l|linux' => \$lin,
@@ -35,18 +35,28 @@ GetOptions(
 	'd' => \$drs,
 	'y' => \$conf,
 	'dx=s' => \$dx,
+	'sql=s' => \$sql,
 	'dell' => \$dell);
 
 @dxa = split(/,/, $dx);
-
-
+@sqla = split(/,/, $sql);
+$ip = inet_ntoa(inet_aton($host));
 tee (STDOUT, '>', "/etc/nagios/tmp_cfg/$host.cfg");
 
+sub host_def {
+print  "define service{
+        use                     generic-nt
+        host_name               $host.hs3.hepsiian.com
+        service_description	$_[0]
+        check_command		$_[1]
+        }
+"};
+
+
 if ( $host ne "") {
-$ip = inet_ntoa(inet_aton($host));
 print "define host {
-        usage           generic-notify
-        host_name       $host
+        use             generic-notify
+        host_name       $host.hs3.hepsiian.com
         alias           $host
         address         $ip
         check_command	check_ping!100.0,20%!500.0,60%
@@ -60,53 +70,42 @@ die print $help;
 
 if ( $lin == 1 ) {
 	foreach $key (keys %linh){ $value = $linh{$key};
-print "define service{
-	use			generic-nt
-	host_name		$host
-	service_description	$key
-	check_command		$value
-	}
-
-"
+&host_def($key,$value);
 }}
 
-%winh = ('Check disk C:', 'check_nt_disk!c', 'Check disk D:', 'check_nt_disk!d', 'Uptime', 'check_nt_uptime', 'Memory', 'check_nt_mem', 'CPU load', 'win_cpu_load');
+%winh = ('Check disk C:', 'check_snmp_disk_win!c', 'Check disk D:', 'check_snmp_disk_win!d', 'Uptime', 'check_snmp_win_uptime', 'Memory', 'check_snmp_mem_win', 'CPU load', 'win_snmp_cpu');
 
-if ( $win == 1 ) {
+if ( $win == 1) {
 	foreach $key (keys %winh){ $value = $winh{$key};
-print "define service{
-        use                     generic-nt
-        host_name               $hostname
-        service_description     $key
-        check_command           $value
-        }
-
-"
+&host_def($key,$value);
 }}
 
 %drsh = ('Check DRS', 'check_nt_service!DRS', 'Check DRS1', 'check_nt_service!DRS1');
 
-if ( $drs == 1 ) {
-        foreach $key (keys %drsh){ $value = $drsh{$key};
-print "define service{
-        use                     generic-nt
-        host_name               $host
-        service_description     $key
-        check_command           $value
-        }
-
-"
+if ( $drs == 1) {
+	foreach $key (keys %drsh){ $value = $drsh{$key};
+&host_def($key,$value);
 }}
 
 if ( @dxa > 0 ) {
 	foreach (@dxa){
 print "define service{
 	use			generic-nt
-	host_name		$host
-	service_description	Check port $_
+	host_name		$host.hs3.hepsiian.com
+	service_description	Check DX port $_
 	check_command		check_tcp!$_
 	}
+"
+}}
 
+if ( @sqla > 0 ) {
+        foreach (@sqla){
+print "define service{
+        use                     generic-nt
+        host_name               $host.hs3.hepsiian.com
+        service_description     MYSQL Slave $_
+        check_command           check_mysql_slave!$_
+        }
 "
 }}
 
@@ -114,16 +113,8 @@ print "define service{
 
 if ( $dell == 1 ) {
 	foreach $key (keys %dellh){ $value = $dellh{$key};
-print "define service{
-        use                     generic-nt
-        host_name               $host
-        service_description     $key
-        check_command           $value
-        }
-
-"
+&host_def($key,$value);
 }}
-
 
 if ( $conf == 1 ) {
 move("/etc/nagios/tmp_cfg/$host.cfg","/etc/nagios/servers/$host.cfg");
