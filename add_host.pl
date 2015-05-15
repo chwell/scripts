@@ -99,7 +99,14 @@ if ( $hp == 1) {
 &host_def($key,$value);
 }}
 
+}}
 
+%dellh = ('Dell battery', 'check_perc_battery_omsm', 'Dell PSU', 'check_dell_psu', 'Dell fans', 'check_dell_fans', 'Dell temp', 'check_dell_temps');
+
+if ( $dell == 1 ) {
+        foreach $key (keys %dellh){ $value = $dellh{$key};
+&host_def($key,$value);
+}}
 
 if ( @dska > 0 ) {
         foreach (@dska){
@@ -154,16 +161,6 @@ print "define service{
         check_command           check_tcp!$_
         }
 "
-}}
-
-%dellh = ('Dell battery', 'check_perc_battery_omsm', 'Dell PSU', 'check_dell_psu', 'Dell fans', 'check_dell_fans', 'Dell temp', 'check_dell_temps');
-
-if ( $dell == 1 ) {
-        foreach $key (keys %dellh){ $value = $dellh{$key};
-&host_def($key,$value);
-}}
-
-
 
 if ( $conf == 1 ) {
 move("/etc/nagios/tmp_cfg/$host.cfg","/etc/nagios/servers/$host.cfg");
